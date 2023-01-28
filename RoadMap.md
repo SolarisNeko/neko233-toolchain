@@ -3,6 +3,12 @@
 # RoadMap
 
 ## version
+### v0.4.0
+1. [Rename] 包重命名, 项目更名为 neko233-toolchain
+2. [Add] WAL @Experimental 
+3. [Add] FileUtils233, ObjectUtils233 相关方法
+4. [BugFix] Regex 的转义
+5. [Add] BloomFilter 
 
 ### v0.1.7
 deploy v0.1.7

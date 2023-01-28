@@ -1,7 +1,5 @@
 package com.neko233.toolchain.common.threadPool;
 
-import com.neko233.toolchain.common.threadPool.PrefixThreadFactory;
-import com.neko233.toolchain.common.threadPool.ThreadPoolBuilder;
 import org.junit.Test;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -17,7 +15,7 @@ public class ThreadPoolBuilderTest {
                 .maximumPoolSize(1)
                 .keepAliveTime(1)
                 .keepAliveTimeUnit(TimeUnit.SECONDS)
-                .threadFactory(PrefixThreadFactory.create("test"))
+                .threadFactory(ThreadFactoryByPrefixName.create("test"))
                 .taskQueue(new LinkedBlockingQueue<>())
                 .rejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy())
                 .build();

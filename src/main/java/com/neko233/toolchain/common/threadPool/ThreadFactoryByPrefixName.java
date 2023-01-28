@@ -5,17 +5,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PrefixThreadFactory implements ThreadFactory {
+public class ThreadFactoryByPrefixName implements ThreadFactory {
 
     private final String prefix;
     private final AtomicInteger counter = new AtomicInteger(1);
 
-    public PrefixThreadFactory(String prefix) {
+    public ThreadFactoryByPrefixName(String prefix) {
         this.prefix = prefix;
     }
 
-    public static PrefixThreadFactory create(String prefix) {
-        return new PrefixThreadFactory(prefix);
+    public static ThreadFactoryByPrefixName create(String prefix) {
+        return new ThreadFactoryByPrefixName(prefix);
     }
 
     @Override

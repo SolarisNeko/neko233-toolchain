@@ -5,10 +5,16 @@ import com.neko233.toolchain.common.base.CollectionUtils233;
 import com.neko233.toolchain.common.base.DataSizeUtils233;
 import com.neko233.toolchain.common.file.visitor.FileVisitorForAccumulate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOExceptionList;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.file.Counters;
+import org.apache.commons.io.file.PathUtils;
+import org.apache.commons.io.file.StandardDeleteOption;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -118,14 +124,7 @@ public class FileUtils233 {
         }
     }
 
-    /**
-     * 显示文件
-     *
-     * @param fileOrDir   文件/目录
-     * @param isRecursive 是否递归
-     * @return 纯文件 (不包含 dir)
-     * @throws IOException
-     */
+
     public static List<File> showFiles(final File fileOrDir) throws IOException {
         return showFiles(fileOrDir, false, null);
     }
@@ -134,12 +133,21 @@ public class FileUtils233 {
         return showFiles(fileOrDir, isRecursive, null);
     }
 
+    /**
+     * 显示文件
+     *
+     * @param fileOrDir   文件/目录
+     * @param isRecursive 是否递归
+     * @param suffixes    后缀名称. example = ".txt"
+     * @return 纯文件 (不包含 dir)
+     * @throws IOException
+     */
     public static List<File> showFiles(final File fileOrDir, final boolean isRecursive, final List<String> suffixes)
             throws IOException {
         final List<String> suffixList = Optional.ofNullable(suffixes).orElse(new ArrayList<>());
 
         if (fileOrDir == null) {
-            return null;
+            return new ArrayList<>();
         }
 
         File dir = fileOrDir;
@@ -153,7 +161,7 @@ public class FileUtils233 {
         if (!isRecursive) {
             File[] array = dir.listFiles();
             if (array == null) {
-                return null;
+                return new ArrayList<>();
             }
             return Arrays.stream(array).filter(File::isFile).collect(Collectors.toList());
         }
@@ -250,4 +258,362 @@ public class FileUtils233 {
     }
 
 
+    /**
+     * 新建文件 if 不存在
+     *
+     * @param newFile 新文件
+     */
+    public static boolean createFileIfNotExists(File newFile) throws IOException {
+        if (newFile.exists()) {
+            return false;
+        }
+        newFile.createNewFile();
+        return true;
+    }
+
+    public static String readAllContent(File file) throws IOException {
+        return readAllContent(file, StandardCharsets.UTF_8);
+    }
+
+    public static String readAllContent(File file, Charset charset) throws IOException {
+        if (file == null || !file.exists()) {
+            return null;
+        }
+        return readLines(file, charset)
+                .stream()
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+
+    public static void write(final File file, final CharSequence data) throws IOException {
+        write(file, data, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * default Append !
+     *
+     * @param file    文本
+     * @param data    数据
+     * @param charset 编码
+     * @throws IOException
+     */
+    public static void write(final File file, final CharSequence data, final Charset charset) throws IOException {
+        write(file, data, charset, true);
+    }
+
+    /**
+     * Writes a CharSequence to a file creating the file if it does not exist.
+     *
+     * @param file    the file to write
+     * @param data    the content to write to the file
+     * @param charset the charset to use, {@code null} means platform default
+     * @param append  if {@code true}, then the data will be added to the
+     *                end of the file rather than overwriting
+     * @throws IOException in case of an I/O error
+     */
+    public static void write(final File file, final CharSequence data, final Charset charset, final boolean append)
+            throws IOException {
+        writeStringToFile(file, Objects.toString(data, null), charset, append);
+    }
+
+
+    /**
+     * 写入文本到文件
+     *
+     * @param file
+     * @param data
+     * @param charset
+     * @param append
+     * @throws IOException
+     */
+    public static void writeStringToFile(final File file, final String data, final Charset charset,
+                                         final boolean append) throws IOException {
+        try (OutputStream out = openOutputStream(file, append)) {
+            IoUtils233.write(data, out, charset);
+        }
+    }
+
+    public static FileOutputStream openOutputStream(final File file, final boolean append) throws IOException {
+        Objects.requireNonNull(file, "file");
+        if (file.exists()) {
+            requireFile(file, "file");
+            requireCanWrite(file, "file");
+        } else {
+            createParentDirectories(file);
+        }
+        return new FileOutputStream(file, append);
+    }
+
+    /**
+     * Requires that the given {@code File} is a file.
+     *
+     * @param file The {@code File} to check.
+     * @param name The parameter name to use in the exception message.
+     * @return the given file.
+     * @throws NullPointerException     if the given {@code File} is {@code null}.
+     * @throws IllegalArgumentException if the given {@code File} does not exist or is not a directory.
+     */
+    private static File requireFile(final File file, final String name) {
+        Objects.requireNonNull(file, name);
+        if (!file.isFile()) {
+            throw new IllegalArgumentException("Parameter '" + name + "' is not a file: " + file);
+        }
+        return file;
+    }
+
+    /**
+     * 文件必须可写入
+     *
+     * @param file The file to test.
+     * @param name The parameter name to use in the exception message.
+     * @throws NullPointerException     if the given {@code File} is {@code null}.
+     * @throws IllegalArgumentException if the file is not writable.
+     */
+    private static void requireCanWrite(final File file, final String name) {
+        Objects.requireNonNull(file, "file");
+        if (!file.canWrite()) {
+            throw new IllegalArgumentException("File parameter '" + name + " is not writable: '" + file + "'");
+        }
+    }
+
+    /**
+     * Creates all parent directories for a File object.
+     *
+     * @param file the File that may need parents, may be null.
+     * @return The parent directory, or {@code null} if the given file does not name a parent
+     * @throws IOException if the directory was not created along with all its parent directories.
+     * @throws IOException if the given file object is not null and not a directory.
+     * @since 2.9.0
+     */
+    public static File createParentDirectories(final File file) throws IOException {
+        return createAllParentDir(getParentFile(file));
+    }
+
+    private static File getParentFile(final File file) {
+        return file == null ? null : file.getParentFile();
+    }
+
+    /**
+     * Calls {@link File#mkdirs()} and throws an exception on failure.
+     *
+     * @param directory the receiver for {@code mkdirs()}, may be null.
+     * @return the given file, may be null.
+     * @throws IOException       if the directory was not created along with all its parent directories.
+     * @throws IOException       if the given file object is not a directory.
+     * @throws SecurityException See {@link File#mkdirs()}.
+     * @see File#mkdirs()
+     */
+    private static File createAllParentDir(final File directory) throws IOException {
+        if ((directory != null)
+                && (!directory.mkdirs()
+                && !directory.isDirectory())) {
+            throw new IOException("Cannot create directory '" + directory + "'.");
+        }
+        return directory;
+    }
+
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The default VM encoding and the default line ending will be used.
+     *
+     * @param file  the file to write to
+     * @param lines the lines to write, {@code null} entries produce blank lines
+     * @throws IOException in case of an I/O error
+     * @since 1.3
+     */
+    public static void writeLines(final File file, final Collection<?> lines) throws IOException {
+        writeLines(file, null, lines, null, false);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The default VM encoding and the default line ending will be used.
+     *
+     * @param file   the file to write to
+     * @param lines  the lines to write, {@code null} entries produce blank lines
+     * @param append if {@code true}, then the lines will be added to the
+     *               end of the file rather than overwriting
+     * @throws IOException in case of an I/O error
+     * @since 2.1
+     */
+    public static void writeLines(final File file, final Collection<?> lines, final boolean append) throws IOException {
+        writeLines(file, null, lines, null, append);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The default VM encoding and the specified line ending will be used.
+     *
+     * @param file       the file to write to
+     * @param lines      the lines to write, {@code null} entries produce blank lines
+     * @param lineEnding the line separator to use, {@code null} is system default
+     * @throws IOException in case of an I/O error
+     * @since 1.3
+     */
+    public static void writeLines(final File file, final Collection<?> lines, final String lineEnding)
+            throws IOException {
+        writeLines(file, null, lines, lineEnding, false);
+    }
+
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The default VM encoding and the specified line ending will be used.
+     *
+     * @param file       the file to write to
+     * @param lines      the lines to write, {@code null} entries produce blank lines
+     * @param lineEnding the line separator to use, {@code null} is system default
+     * @param append     if {@code true}, then the lines will be added to the
+     *                   end of the file rather than overwriting
+     * @throws IOException in case of an I/O error
+     * @since 2.1
+     */
+    public static void writeLines(final File file, final Collection<?> lines, final String lineEnding,
+                                  final boolean append) throws IOException {
+        writeLines(file, null, lines, lineEnding, append);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The specified character encoding and the default line ending will be used.
+     * <p>
+     * NOTE: As from v1.3, the parent directories of the file will be created
+     * if they do not exist.
+     * </p>
+     *
+     * @param file        the file to write to
+     * @param charsetName the name of the requested charset, {@code null} means platform default
+     * @param lines       the lines to write, {@code null} entries produce blank lines
+     * @throws IOException                          in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException if the encoding is not supported by the VM
+     * @since 1.1
+     */
+    public static void writeLines(final File file, final String charsetName, final Collection<?> lines)
+            throws IOException {
+        writeLines(file, charsetName, lines, null, false);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line, optionally appending.
+     * The specified character encoding and the default line ending will be used.
+     *
+     * @param file        the file to write to
+     * @param charsetName the name of the requested charset, {@code null} means platform default
+     * @param lines       the lines to write, {@code null} entries produce blank lines
+     * @param append      if {@code true}, then the lines will be added to the
+     *                    end of the file rather than overwriting
+     * @throws IOException                          in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException if the encoding is not supported by the VM
+     * @since 2.1
+     */
+    public static void writeLines(final File file, final String charsetName, final Collection<?> lines,
+                                  final boolean append) throws IOException {
+        writeLines(file, charsetName, lines, null, append);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The specified character encoding and the line ending will be used.
+     * <p>
+     * NOTE: As from v1.3, the parent directories of the file will be created
+     * if they do not exist.
+     * </p>
+     *
+     * @param file        the file to write to
+     * @param charsetName the name of the requested charset, {@code null} means platform default
+     * @param lines       the lines to write, {@code null} entries produce blank lines
+     * @param lineEnding  the line separator to use, {@code null} is system default
+     * @throws IOException                          in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException if the encoding is not supported by the VM
+     * @since 1.1
+     */
+    public static void writeLines(final File file, final String charsetName, final Collection<?> lines,
+                                  final String lineEnding) throws IOException {
+        writeLines(file, charsetName, lines, lineEnding, false);
+    }
+
+    /**
+     * Writes the {@code toString()} value of each item in a collection to
+     * the specified {@code File} line by line.
+     * The specified character encoding and the line ending will be used.
+     *
+     * @param file        the file to write to
+     * @param charsetName the name of the requested charset, {@code null} means platform default
+     * @param lines       the lines to write, {@code null} entries produce blank lines
+     * @param lineEnding  the line separator to use, {@code null} is system default
+     * @param append      if {@code true}, then the lines will be added to the
+     *                    end of the file rather than overwriting
+     * @throws IOException                          in case of an I/O error
+     * @throws java.io.UnsupportedEncodingException if the encoding is not supported by the VM
+     */
+    public static void writeLines(final File file,
+                                  final String charsetName,
+                                  final Collection<?> lines,
+                                  final String lineEnding,
+                                  final boolean append
+    ) throws IOException {
+        try (OutputStream out = new BufferedOutputStream(openOutputStream(file, append))) {
+            IOUtils.writeLines(lines, lineEnding, out, charsetName);
+        }
+    }
+
+    public static boolean deleteQuietly(final File file) {
+        if (file == null) {
+            return false;
+        }
+        try {
+            if (file.isDirectory()) {
+                cleanDirectory(file);
+            }
+        } catch (final Exception ignored) {
+            // ignore
+        }
+
+        try {
+            return file.delete();
+        } catch (final Exception ignored) {
+            return false;
+        }
+    }
+
+    public static void cleanDirectory(final File directory) throws IOException {
+        List<File> files = showFiles(directory, true);
+
+        final List<Exception> causeList = new ArrayList<>();
+        for (final File file : files) {
+            try {
+                forceDelete(file);
+            } catch (final IOException ioe) {
+                causeList.add(ioe);
+            }
+        }
+
+        if (!causeList.isEmpty()) {
+            throw new IOExceptionList(directory.toString(), causeList);
+        }
+    }
+
+    public static void forceDelete(final File file) throws IOException {
+        Objects.requireNonNull(file, "file");
+        final Counters.PathCounters deleteCounters;
+        try {
+            deleteCounters = PathUtils.delete(file.toPath(), PathUtils.EMPTY_LINK_OPTION_ARRAY,
+                    StandardDeleteOption.OVERRIDE_READ_ONLY);
+        } catch (final IOException e) {
+            throw new IOException("Cannot delete file: " + file, e);
+        }
+
+        if (deleteCounters.getFileCounter().get() < 1 && deleteCounters.getDirectoryCounter().get() < 1) {
+            // didn't find a file to delete.
+            throw new FileNotFoundException("File does not exist: " + file);
+        }
+    }
 }

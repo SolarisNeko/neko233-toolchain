@@ -8,13 +8,13 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%-5level] %d{'yyyy-MM-dd HH:mm:ss,SSS'} [%thread] %logger{36} - %msg%n</pattern>
+            <pattern>%d{'yyyy-MM-dd HH:mm:ss,SSS'} [%-5level] [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
-            <pattern>[%-5level] %d{'yyyy-MM-dd HH:mm:ss,SSS'} [%thread] %logger{36} - %msg%n</pattern>
+            <pattern>%d{'yyyy-MM-dd HH:mm:ss,SSS'} [%-5level] [%thread] %logger{36} - %msg%n</pattern>
             <charset>utf-8</charset>
         </encoder>
         <file>logs/output.log</file>

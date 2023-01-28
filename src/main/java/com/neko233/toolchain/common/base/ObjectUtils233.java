@@ -15,4 +15,7 @@ public class ObjectUtils233 {
         return !allNotNull(objects);
     }
 
+    public static <T> T getOrDefault(T object, T defaultValue) {
+        return object == null ? defaultValue : object;
+    }
 }
