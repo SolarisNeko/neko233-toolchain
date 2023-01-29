@@ -1,6 +1,5 @@
 package com.neko233.toolchain.common.base;
 
-import com.neko233.toolchain.common.base.StringUtils233;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,6 +19,24 @@ public class StringUtils233Test {
     public void test_toBigCamelCaseLower() {
         String systemUser = StringUtils233.toBigCamelCaseLower("SystemUser");
         Assert.assertEquals("system_user", systemUser);
+    }
+
+    @Test
+    public void test_isNumber_success() {
+        boolean number = StringUtils233.isNumber("1234");
+        Assert.assertTrue(number);
+    }
+
+    @Test
+    public void test_isNumber_failure() {
+        boolean number = StringUtils233.isNumber("1234a");
+        Assert.assertFalse(number);
+    }
+
+    @Test
+    public void test_toStringObject() {
+        String systemUser = StringUtils233.stringTextToStringObject("\"SystemUser\"");
+        Assert.assertEquals("SystemUser", systemUser);
     }
 
 }

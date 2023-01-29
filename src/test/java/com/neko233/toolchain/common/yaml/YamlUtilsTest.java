@@ -1,7 +1,7 @@
 package com.neko233.toolchain.common.yaml;
 
-import com.neko233.toolchain.common.yaml.YamlData;
-import com.neko233.toolchain.common.yaml.YamlUtils;
+import com.neko233.toolchain.parser.yaml.YamlData;
+import com.neko233.toolchain.parser.yaml.YamlUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

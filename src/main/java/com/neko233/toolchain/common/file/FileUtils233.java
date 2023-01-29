@@ -19,6 +19,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -615,5 +616,17 @@ public class FileUtils233 {
             // didn't find a file to delete.
             throw new FileNotFoundException("File does not exist: " + file);
         }
+    }
+
+    public static void iterateLines(File file, Consumer<String> lineConsumer) throws IOException {
+        //创建类进行文件的读取，并指定编码格式为utf-8
+        InputStreamReader read = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
+        BufferedReader in = new BufferedReader(read);//可用于读取指定文件
+        String line = null;
+
+        while ((line = in.readLine()) != null) {
+            lineConsumer.accept(line);
+        }
+        in.close();
     }
 }

@@ -702,15 +702,17 @@ public class StringUtils233 {
     }
 
 
+
+    public static boolean isNotNumber(String str) {
+        return !isNumber(str);
+    }
+
     /**
      * string is a number string ?
      *
      * @param str 文本
      * @return is number ?
      */
-    public static boolean isNotNumber(String str) {
-        return !isNumber(str);
-    }
     public static boolean isNumber(String str) {
         if (str == null || str.length() == 0) {
             return false;
@@ -808,5 +810,15 @@ public class StringUtils233 {
         // allowSigns is true iff the val ends in 'E'
         // found digit it to make sure weird stuff like '.' and '1E-' doesn't pass
         return !allowSigns && foundDigit;
+    }
+
+    /**
+     * \"abc\" -> abc
+     * @param stringText 文本, \" will delete | 如果还要表示文本, 使用 'abc'
+     * @return just a string object
+     */
+    public static String stringTextToStringObject(String stringText) {
+        return Optional.ofNullable(stringText).orElse("")
+                .replaceAll("\"", "");
     }
 }

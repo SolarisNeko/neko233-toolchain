@@ -25,17 +25,27 @@ import java.nio.charset.StandardCharsets;
 public class WalMetadata {
 
     public static final long BEGIN_NUMBER = 1;
+    public static final long MAX_SEQUENCE_ID = 50;
 
-    private volatile Long currentSequenceId; // 当前指向的 sequenceId 是未刷盘的
-    private volatile File currentDataFile;
-    private volatile String fileTemplate;
+    private Long currentSequenceId; // 当前指向的 sequenceId 是未刷盘的
+    private String fileTemplate;
+    private File currentWalFile;
+    private long previousFlushMs;
 
     public static WalMetadata createFirst(String fileTemplate) {
         return WalMetadata.builder()
                 .currentSequenceId(BEGIN_NUMBER)
                 .fileTemplate(fileTemplate)
-                .currentDataFile(new File(fileTemplate + "." + BEGIN_NUMBER))
+                .currentWalFile(new File(fileTemplate + "." + BEGIN_NUMBER))
                 .build();
+    }
+
+    public Long getCurrentSequenceId() {
+        long historySequenceId = currentSequenceId;
+        // auto fix | if MAX_SEQUENCE_ID happen change
+        this.currentSequenceId = currentSequenceId > MAX_SEQUENCE_ID ? MAX_SEQUENCE_ID : currentSequenceId;
+        this.currentWalFile = newWalFile();
+        return historySequenceId;
     }
 
     /**
@@ -44,15 +54,19 @@ public class WalMetadata {
      * @return 更新后的 metadata
      * @throws IOException IO 异常
      */
-    public WalMetadata next() throws IOException {
+    public WalMetadata nextSequence() throws IOException {
         this.currentSequenceId += 1;
         // loop
-        if (this.currentSequenceId == Long.MAX_VALUE) {
+        if (this.currentSequenceId > getMaxSequenceId()) {
             this.currentSequenceId = 1L;
         }
-        this.currentDataFile = new File(buildDataFileName(this.currentSequenceId));
-        FileUtils233.createFileIfNotExists(this.currentDataFile);
+        this.currentWalFile = new File(buildDataFileName(this.currentSequenceId));
+        FileUtils233.createFileIfNotExists(this.currentWalFile);
         return this;
+    }
+
+    public static long getMaxSequenceId() {
+        return MAX_SEQUENCE_ID;
     }
 
     @NotNull
@@ -66,7 +80,11 @@ public class WalMetadata {
      *
      * @param dataFile dataFile
      */
-    public void writeAheadLogToFile(File dataFile) {
+    public void writeAheadLogToFile(final File dataFile) {
+        if (dataFile == null) {
+            log.error("why your WAL data file is null ? please check.");
+            return;
+        }
         String json = JSON.toJSONString(this);
         try {
             FileUtils233.write(dataFile, json, StandardCharsets.UTF_8, false);
@@ -75,7 +93,21 @@ public class WalMetadata {
         }
     }
 
-    public File newSeqFile() {
-        return new File(fileTemplate + "." + this.getCurrentSequenceId());
+    public File newWalFile() {
+        return new File(fileTemplate + "." + this.currentSequenceId);
+    }
+
+    public boolean isNeedRollingByBytes(long fileRollingByteSize) {
+        return currentWalFile.length() >= fileRollingByteSize;
+    }
+
+    public boolean isNeedRollingByTimeMsAndHaveData(long keepWalFileMs) {
+        return (System.currentTimeMillis() - previousFlushMs) > keepWalFileMs;
+    }
+
+
+    public void updateCurrentWalFile(File walFile) throws IOException {
+        this.currentWalFile = walFile;
+        FileUtils233.createFileIfNotExists(walFile);
     }
 }

@@ -1,4 +1,4 @@
-package com.neko233.toolchain.common.parser.functionText;
+package com.neko233.toolchain.parser.functionText;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +15,11 @@ import java.util.Map;
 public class FunctionText {
 
     private String functionName;
+    /**
+     * also is a param value...
+     * demo: ifNull(D1, 1) == 1
+     */
     private List<String> metadata;
     private Map<String, String> kv;
-
-    public static void main(String[] args) {
-        new FunctionText();
-    }
 
 }
