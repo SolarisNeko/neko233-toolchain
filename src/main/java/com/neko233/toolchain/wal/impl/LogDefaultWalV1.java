@@ -1,7 +1,7 @@
 package com.neko233.toolchain.wal.impl;
 
 import com.alibaba.fastjson2.JSON;
-import com.neko233.toolchain.wal.DefaultWal;
+import com.neko233.toolchain.wal.DefaultWalV1;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -14,13 +14,13 @@ import java.util.List;
  * Date on 2023-01-29
  */
 @Slf4j
-public class LogDefaultWal<D> extends DefaultWal<D> {
+public class LogDefaultWalV1<D> extends DefaultWalV1<D> {
     /**
      * @param templateFilePath 模板文件, 可不存在的
      * @param dataSchema       数据结构
      * @throws Exception 参数检查异常
      */
-    public LogDefaultWal(File templateFilePath, Class<D> dataSchema) throws Exception {
+    public LogDefaultWalV1(File templateFilePath, Class<D> dataSchema) throws Exception {
         super(templateFilePath, dataSchema);
     }
 

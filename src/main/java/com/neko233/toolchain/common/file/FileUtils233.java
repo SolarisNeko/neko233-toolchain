@@ -629,4 +629,20 @@ public class FileUtils233 {
         }
         in.close();
     }
+
+    /**
+     * 文件是否空白 = not exists / blank
+     * @param fileAbsolutePath 目标文件全路径
+     * @return isBlank
+     */
+    public static boolean isFileBlank(String fileAbsolutePath) {
+        File file = new File(fileAbsolutePath);
+        if (!file.exists()) {
+            return true;
+        }
+        if (file.length() == 0) {
+            return true;
+        }
+        return false;
+    }
 }
