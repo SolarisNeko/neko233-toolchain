@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validation;
+package com.neko233.toolchain.validator;
 
 
 import com.neko233.toolchain.common.reflect.ReflectUtils233;
@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 注解校验器
+ *
  * @author SolarisNeko on 2022-12-30
  */
-public class Validator {
+public class Validator233 {
 
     public static final Map<Class<?>, Map<Field, List<ValidateApi>>> classValidateCache = new ConcurrentHashMap<>();
 
@@ -53,9 +55,9 @@ public class Validator {
                 }
                 try {
                     Annotation anno = field.getAnnotation(annotationType);
-                    isOk = validateApi.handle(anno, value);
+                    isOk = validateApi.validateOk(anno, value);
                     if (!isOk) {
-                        reason = validateApi.getReason(anno, value);
+                        reason = validateApi.getReason(anno, field.getName(), value);
                     }
                 } catch (Throwable t) {
                     return ValidateContext.builder()

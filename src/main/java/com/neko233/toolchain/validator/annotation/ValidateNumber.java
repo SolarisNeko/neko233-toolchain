@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validation.annotation;
+package com.neko233.toolchain.validator.annotation;
 
 import java.lang.annotation.*;
 

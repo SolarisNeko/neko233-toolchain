@@ -1,7 +1,7 @@
 package com.neko233.toolchain.common.base;
 
 
-import com.neko233.toolchain.validation.annotation.NotNull;
+import com.neko233.toolchain.validator.annotation.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,6 +1,6 @@
 package com.neko233.toolchain.common.cache.objects.impl;
 
-import com.neko233.toolchain.validation.annotation.ThreadNotSafe;
+import com.neko233.toolchain.common.annotation.ThreadNotSafe;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

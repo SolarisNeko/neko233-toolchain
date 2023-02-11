@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validation;
+package com.neko233.toolchain.validator;
 
 import com.neko233.toolchain.common.scanner.PackageScanner;
 import lombok.extern.slf4j.Slf4j;

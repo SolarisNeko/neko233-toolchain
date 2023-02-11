@@ -1,6 +1,6 @@
 package com.neko233.toolchain.common.base;
 
-import com.neko233.toolchain.validation.annotation.Nullable;
+import com.neko233.toolchain.validator.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

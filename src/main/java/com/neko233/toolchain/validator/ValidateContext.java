@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validation;
+package com.neko233.toolchain.validator;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

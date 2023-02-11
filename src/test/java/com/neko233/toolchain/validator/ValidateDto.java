@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validation;
+package com.neko233.toolchain.validator;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;

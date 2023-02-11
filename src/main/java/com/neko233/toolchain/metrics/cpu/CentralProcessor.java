@@ -2,8 +2,8 @@ package com.neko233.toolchain.metrics.cpu;
 
 import com.neko233.toolchain.common.base.*;
 import com.neko233.toolchain.common.file.FileUtils233;
-import com.neko233.toolchain.validation.annotation.Immutable;
-import com.neko233.toolchain.validation.annotation.ThreadSafe;
+import com.neko233.toolchain.common.annotation.Immutable;
+import com.neko233.toolchain.common.annotation.ThreadSafe;
 
 import java.util.List;
 import java.util.Properties;

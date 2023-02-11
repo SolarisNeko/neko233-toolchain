@@ -1,8 +1,8 @@
-package com.neko233.toolchain.validation.impl.my;
+package com.neko233.toolchain.validator.impl.my;
 
 import com.neko233.toolchain.common.base.StringUtils233;
-import com.neko233.toolchain.validation.ValidateApi;
-import com.neko233.toolchain.validation.annotation.ValidateNumber;
+import com.neko233.toolchain.validator.ValidateApi;
+import com.neko233.toolchain.validator.annotation.ValidateNumber;
 
 /**
  * ValidateNumber Validator
@@ -15,7 +15,7 @@ public class NumberValidator implements ValidateApi<ValidateNumber, Number> {
     }
 
     @Override
-    public boolean handle(ValidateNumber annotation, Number fieldValue) {
+    public boolean validateOk(ValidateNumber annotation, Number fieldValue) {
         int min = annotation.min();
         int max = annotation.max();
 
@@ -34,12 +34,12 @@ public class NumberValidator implements ValidateApi<ValidateNumber, Number> {
     }
 
     @Override
-    public String getReason(ValidateNumber annotation, Number fieldValue) {
+    public String getReason(ValidateNumber annotation, String fieldName, Number fieldValue) {
         if (StringUtils233.isNotBlank(annotation.tips())) {
             return annotation.tips();
         }
-        return String.format("Your number is not in constraint. min = %s, max = %s, your value = %s",
-                annotation.min(), annotation.max(), fieldValue);
+        return String.format("field = %s, Your number is not in constraint. min = %s, max = %s, your value = %s",
+                fieldName, annotation.min(), annotation.max(), fieldValue);
     }
 
 }

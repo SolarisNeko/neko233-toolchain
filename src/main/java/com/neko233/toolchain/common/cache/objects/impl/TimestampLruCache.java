@@ -6,7 +6,7 @@ import com.neko233.toolchain.common.cache.objects.Cache;
 import com.neko233.toolchain.common.cache.objects.FlushListener;
 import com.neko233.toolchain.common.cache.objects.metrics.CacheMetrics;
 import com.neko233.toolchain.common.cache.objects.ref.TimestampSoftRef;
-import com.neko233.toolchain.validation.annotation.ThreadSafe;
+import com.neko233.toolchain.common.annotation.ThreadSafe;
 
 import java.util.List;
 import java.util.Map;

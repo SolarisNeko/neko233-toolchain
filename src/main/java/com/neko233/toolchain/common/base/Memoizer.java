@@ -1,6 +1,6 @@
 package com.neko233.toolchain.common.base;
 
-import com.neko233.toolchain.validation.annotation.ThreadSafe;
+import com.neko233.toolchain.common.annotation.ThreadSafe;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;

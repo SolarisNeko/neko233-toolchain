@@ -1,4 +1,4 @@
-package com.neko233.toolchain.common.idus;
+package com.neko233.toolchain.common.crud;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -9,7 +9,7 @@ import java.util.Collections;
  *
  * @author SolarisNeko on 2023-01-05
  **/
-public interface IdusApi<T> {
+public interface CrudApi<T> {
 
     /**
      * add

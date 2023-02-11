@@ -1,7 +1,7 @@
 package com.neko233.toolchain.common.dataStruct.objects;
 
 
-import com.neko233.toolchain.validation.annotation.ThreadSafe;
+import com.neko233.toolchain.common.annotation.ThreadSafe;
 
 /**
  * 对向元组 3

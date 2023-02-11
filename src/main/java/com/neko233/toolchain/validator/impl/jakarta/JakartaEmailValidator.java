@@ -1,7 +1,7 @@
-package com.neko233.toolchain.validation.impl.jakarta;
+package com.neko233.toolchain.validator.impl.jakarta;
 
 import com.neko233.toolchain.common.base.StringUtils233;
-import com.neko233.toolchain.validation.ValidateApi;
+import com.neko233.toolchain.validator.ValidateApi;
 import jakarta.validation.constraints.Email;
 
 import java.util.regex.Matcher;
@@ -18,7 +18,7 @@ public class JakartaEmailValidator implements ValidateApi<Email, String> {
     }
 
     @Override
-    public boolean handle(Email value, String fieldValue) {
+    public boolean validateOk(Email value, String fieldValue) {
         // 大小写敏感
         Pattern pattern = Pattern.compile(value.regexp(), Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(fieldValue);
@@ -26,7 +26,7 @@ public class JakartaEmailValidator implements ValidateApi<Email, String> {
     }
 
     @Override
-    public String getReason(Email email, String fieldValue) {
+    public String getReason(Email email, String fieldName, String fieldValue) {
         if (StringUtils233.isNotBlank(email.message())) {
             return email.message();
         }

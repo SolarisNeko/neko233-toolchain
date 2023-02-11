@@ -2,7 +2,7 @@ package com.neko233.toolchain.common.base;
 
 import com.neko233.toolchain.common.dataStruct.objects.Pair;
 import com.neko233.toolchain.common.dataStruct.objects.Tuple3;
-import com.neko233.toolchain.validation.annotation.ThreadSafe;
+import com.neko233.toolchain.common.annotation.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
