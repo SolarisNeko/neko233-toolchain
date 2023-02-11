@@ -33,58 +33,58 @@ import java.util.stream.Collectors;
  */
 @Experimental(comment = "Async WAL and default 100ms/flush by your provider consumer API")
 @Slf4j
-public abstract class AbstractWal<D> {
+public abstract class AbstractWalV1<D> {
 
     // ASA batch size
-    public static final int MAX_DRAIN_ELEMENTS_SIZE = 4000;
-    // flush data ThreadPool
-    private final ThreadPoolExecutor flushDataThreadPool;
+    public static final int DEFAULT_CONSUMER_SIZE = 4000;
+    public static final long DEFAULT_KEEP_WAL_FILE_MS_1_S = TimeUnit.SECONDS.toMillis(1);
+    public static final long DEFAULT_CONSUMER_DISPATCHER_INTERVAL_100_MS = TimeUnit.MILLISECONDS.toMillis(100);
+    public static final int DEFAULT_MAX_WAL_FILE_COUNT_10 = 10;
+
 
     public static final String WAL_METADATA_FILE_SUFFIX = ".wal.metadata";
+
+    // lock
+    private final Lock lock = new ReentrantLock();
+    private final AtomicBoolean isClose = new AtomicBoolean(false);
+    private final Class<D> dataSchema;
+    private final Map<String, String> configMap;
 
     /**
      * use this template for : /path/to/file -> /path/to/file.${millisSeconds}
      */
-    private final AtomicBoolean isClose = new AtomicBoolean(false);
-    private final Class<D> dataSchema;
     private final String fileTemplate;
     private final File currentMetadataFile;
     private final String fileTemplateName;
-    private volatile WalMetadata metadata;
+    private volatile WalMetadataV1 metadata;
 
     // async
     private Thread walThread;
+    private Thread consumerDispatcherThread;
+    private final ThreadPoolExecutor consumerThreadPool;
 
     // retention policy
-    private final long fileRollingByteSize; // Number of bytes before we roll the file.
-    private final long keepWalFileMs; // Number of bytes before we roll the file.
-    public static final long DEFAULT_KEEP_WAL_FILE_MS_1S = TimeUnit.SECONDS.toMillis(1);
+    private final long fileRollingByteSize; // 文件大小滚动
+    private final long keepWalFileMs; // 日志保存毫秒数
     private final int keepWalFileCount; // 保留多少个 WAL 文件
-    public static final int DEFAULT_MAX_WAL_FILE_COUNT_10 = 10;
+    private int consumerDispatcherThreadIntervalMs; // 单条线程最多处理多少个数据
+    private int singleThreadConsumerDataSize; // 单条线程最多处理多少个数据
     // thread
-    private final int workerIntervalMs; // How often in ms the background worker runs
+    private final int consumerIntervalMs; // 消费间隔
 
-    // lock
-    private final Lock lock = new ReentrantLock();
-    // data
-    private final BlockingQueue<D> dataQueue = new LinkedBlockingQueue<>();
-    private final BlockingQueue<D> walFileDataQueue = new LinkedBlockingQueue<>();
+    // liner Queue, 2 Q for speed
+    private final BlockingQueue<D> producerQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<D> consumerQueue = new LinkedBlockingQueue<>();
 
     /**
-     * @param templateFilePath    模板文件 full path, 不需要存在, 只是作为前缀
-     * @param dataSchema          数据结构
-     * @param fileRollingByteSize 文件大小滚动
-     * @param keepWalFileMs       日志保存毫秒数
-     * @param keepWalFileCount    最大 WAL 数据文件数量
-     * @param workerIntervalMs    线程间隔
+     * @param templateFilePath 模板文件 full path, 不需要存在, 只是作为前缀
+     * @param dataSchema       数据结构
+     * @param configMap        配置参数 if null use default
      * @throws Exception 参数检查异常
      */
-    public AbstractWal(final File templateFilePath,
-                       final Class<D> dataSchema,
-                       final Long fileRollingByteSize,
-                       final Long keepWalFileMs,
-                       final Integer keepWalFileCount,
-                       final Integer workerIntervalMs
+    public AbstractWalV1(final File templateFilePath,
+                         final Class<D> dataSchema,
+                         final Map<String, String> configMap
     ) throws Exception {
         if (templateFilePath == null) {
             throw new IllegalArgumentException("file can not null");
@@ -93,6 +93,9 @@ public abstract class AbstractWal<D> {
             throw new IllegalArgumentException("WAL Data class can not null");
         }
 
+        this.configMap = Optional.ofNullable(configMap).orElse(new HashMap<>());
+
+
         this.dataSchema = dataSchema;
         this.fileTemplate = templateFilePath.getAbsolutePath();
         this.fileTemplateName = templateFilePath.getName();
@@ -100,36 +103,21 @@ public abstract class AbstractWal<D> {
         // metadata
         this.currentMetadataFile = new File(templateFilePath.getAbsolutePath() + WAL_METADATA_FILE_SUFFIX);
 
-        // record
-        this.fileRollingByteSize = ObjectUtils233.getOrDefault(fileRollingByteSize, 1024L);
-        this.keepWalFileMs = ObjectUtils233.getOrDefault(keepWalFileMs, DEFAULT_KEEP_WAL_FILE_MS_1S);
-        this.keepWalFileCount = ObjectUtils233.getOrDefault(keepWalFileCount, DEFAULT_MAX_WAL_FILE_COUNT_10);
-        this.workerIntervalMs = ObjectUtils233.getOrDefault(workerIntervalMs, 100);
+        // diy Config
+        this.fileRollingByteSize = Long.parseLong(this.configMap.getOrDefault("fileRollingByteSize", "1024"));
+        this.keepWalFileMs = Long.parseLong(this.configMap.getOrDefault("keepWalFileMs", String.valueOf(DEFAULT_KEEP_WAL_FILE_MS_1_S)));
+        this.keepWalFileCount = Integer.parseInt(this.configMap.getOrDefault("keepWalFileCount", String.valueOf(DEFAULT_MAX_WAL_FILE_COUNT_10)));
+        this.consumerIntervalMs = Integer.parseInt(this.configMap.getOrDefault("workerIntervalMs", String.valueOf(100)));
+        this.singleThreadConsumerDataSize = Integer.parseInt(this.configMap.getOrDefault("singleThreadConsumerDataSize", String.valueOf(DEFAULT_CONSUMER_SIZE)));
+        this.consumerDispatcherThreadIntervalMs = Integer.parseInt(this.configMap.getOrDefault("consumerDispatcherThreadIntervalMs", String.valueOf(DEFAULT_CONSUMER_DISPATCHER_INTERVAL_100_MS)));
         // tp
-        this.flushDataThreadPool = ThreadPoolHelper233.ioThreadPool("WAL-" + templateFilePath.getName(), new ThreadPoolExecutor.CallerRunsPolicy());
+        this.consumerThreadPool = ThreadPoolHelper233.ioThreadPool("WAL-consumer-" + templateFilePath.getName(), new ThreadPoolExecutor.CallerRunsPolicy());
 
         initAndCheck();
     }
 
     void initAndCheck() throws IOException {
-
-        boolean isNewCreate = FileUtils233.createFileIfNotExists(this.currentMetadataFile);
-        if (isNewCreate) {
-            metadata = WalMetadata.createFirst(this.fileTemplate);
-        }
-        final String content = FileUtils233.readAllContent(this.currentMetadataFile);
-        boolean isFirstInit = false;
-        if (StringUtils233.isBlank(content)) {
-            this.metadata = WalMetadata.createFirst(this.fileTemplate);
-            isFirstInit = true;
-        }
-
-        if (!isFirstInit) {
-            this.metadata = JSON.parseObject(content, WalMetadata.class);
-        }
-        PreconditionUtils233.checkNotNull(this.metadata, "your metadata is null!");
-        flushMetaData();
-
+        restoreMetadataFromFile(this.currentMetadataFile);
 
         // ------------- init finish --------------
 
@@ -138,13 +126,54 @@ public abstract class AbstractWal<D> {
 
 
         // WAL thread
-        this.walThread = createWalThread();
+        this.consumerDispatcherThread = createConsumerDispatcherThread();
+        consumerDispatcherThread.start();
+        this.walThread = createProducerThread();
         walThread.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            close();
+            this.close();
         }));
     }
+
+    private void restoreMetadataFromFile(File metadataFile) throws IOException {
+        boolean isNewCreate = FileUtils233.createFileIfNotExists(metadataFile);
+        if (isNewCreate) {
+            metadata = WalMetadataV1.createFirst(this.fileTemplate);
+        }
+        final String content = FileUtils233.readAllContent(metadataFile);
+        boolean isFirstInit = false;
+        if (StringUtils233.isBlank(content)) {
+            this.metadata = WalMetadataV1.createFirst(this.fileTemplate);
+            isFirstInit = true;
+        }
+
+        if (!isFirstInit) {
+            this.metadata = JSON.parseObject(content, WalMetadataV1.class);
+        }
+        PreconditionUtils233.checkNotNull(this.metadata, "your metadata is null!");
+
+        flushMetaData();
+    }
+
+    private Thread createProducerThread() {
+        return ThreadUtils233.newThread("WAL-consumer-flush-thread-" + fileTemplateName,
+                () -> {
+                    while (true) {
+                        try {
+                            batchWriteToWalFile();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+    }
+
 
     private List<File> getCurrentDirFiles() throws IllegalAccessException {
         File dir = new File(fileTemplate).getParentFile();
@@ -164,7 +193,7 @@ public abstract class AbstractWal<D> {
         // recover data
         final String historyWalFileAbsPath = this.metadata.buildDataFileName(this.metadata.getCurrentSequenceId());
         final File historyWalFile = new File(historyWalFileAbsPath);
-        this.metadata.updateCurrentWalFile(historyWalFile);
+        this.metadata.resetCurrentWalFile(historyWalFile);
 
         final List<String> jsonLines = FileUtils233.readLines(historyWalFile, StandardCharsets.UTF_8);
         final List<WalDumpData> collect = Optional.of(jsonLines).orElse(new ArrayList<>())
@@ -192,18 +221,16 @@ public abstract class AbstractWal<D> {
      * @return WAL 线程, not start
      */
     @NotNull
-    private Thread createWalThread() {
-        return ThreadUtils233.newThread("wal-thread-" + fileTemplateName,
+    private Thread createConsumerDispatcherThread() {
+        return ThreadUtils233.newThread("WAL-consumer-thread-" + fileTemplateName,
                 () -> {
-                    final AbstractWal<D> wal = this;
+                    final AbstractWalV1<D> wal = this;
                     // never error
                     while (true) {
                         // core
                         lock.lock();
                         try {
-                            writeDataToWalFile();
-
-                            flushWalDataToConsumer();
+                            dispatcherDataToWorker();
 
                             wal.cleanHistoryDataFile();
 
@@ -213,8 +240,9 @@ public abstract class AbstractWal<D> {
                         } finally {
                             lock.unlock();
                         }
+                        // 独立的时间
                         try {
-                            TimeUnit.MILLISECONDS.sleep(workerIntervalMs);
+                            TimeUnit.MILLISECONDS.sleep(this.consumerDispatcherThreadIntervalMs);
                         } catch (Throwable e) {
                             log.error("WAL async thread happen interrupted! but you can't interrupted it!", e);
                         }
@@ -222,9 +250,9 @@ public abstract class AbstractWal<D> {
                 });
     }
 
-    private void writeDataToWalFile() {
+    private void batchWriteToWalFile() {
         final List<D> dataList = new ArrayList<>();
-        walFileDataQueue.drainTo(dataList, MAX_DRAIN_ELEMENTS_SIZE);
+        producerQueue.drainTo(dataList, singleThreadConsumerDataSize);
 
         // wal
         final File currentWalFile = this.metadata.getCurrentWalFile();
@@ -253,7 +281,7 @@ public abstract class AbstractWal<D> {
     /**
      * flush Data
      */
-    private void flushWalDataToConsumer() {
+    private void dispatcherDataToWorker() {
         // double lock for concurrent
         lock.lock();
         try {
@@ -261,7 +289,7 @@ public abstract class AbstractWal<D> {
                 return;
             }
 
-            this.flushDataToConsumer();
+            this.asyncFlushDisk();
 
             this.nextSequenceAndUpdate();
 
@@ -284,7 +312,7 @@ public abstract class AbstractWal<D> {
         final List<String> keepSeqFileAbsolutePath = new ArrayList<>();
         for (long i = 0; i < keepWalFileCount; i++) {
             // for loop | + 1 is because zero not use
-            long keepSeqId = currentSeqId - i < 0 ? WalMetadata.getMaxSequenceId() + currentSeqId - i + 1 : currentSeqId - i;
+            long keepSeqId = currentSeqId - i < 0 ? WalMetadataV1.getMaxSequenceId() + currentSeqId - i + 1 : currentSeqId - i;
             final String dataFileName = this.metadata.buildDataFileName(keepSeqId);
             keepSeqFileAbsolutePath.add(dataFileName);
         }
@@ -325,30 +353,27 @@ public abstract class AbstractWal<D> {
     }
 
     private void flushMetaData() {
-        this.metadata.writeAheadLogToFile(this.currentMetadataFile);
+        this.metadata.flushMetadataToFile(this.currentMetadataFile);
     }
 
     /**
      * it will clear all memory Data in Queue, then trigger Consumer
      */
-    public void flushDataToConsumer() {
+    public void asyncFlushDisk() {
         // async callback
-        this.flushDataThreadPool.execute(() -> {
+        this.consumerThreadPool.execute(() -> {
             lock.lock();
             try {
-                if (dataQueue.isEmpty()) {
+                if (consumerQueue.isEmpty()) {
                     return;
                 }
 
                 final List<D> objects = new ArrayList<>();
-                dataQueue.drainTo(objects, MAX_DRAIN_ELEMENTS_SIZE);
-
+                consumerQueue.drainTo(objects, singleThreadConsumerDataSize);
                 if (CollectionUtils233.isEmpty(objects)) {
                     return;
                 }
-                // data
                 List<D> toConsumeDataList = Collections.unmodifiableList(objects);
-
 
                 try {
                     flush(toConsumeDataList);
@@ -369,13 +394,13 @@ public abstract class AbstractWal<D> {
      * @return 内存未刷盘数据
      */
     public List<D> getMemoryData() {
-        return Collections.unmodifiableList(new ArrayList<>(dataQueue));
+        return Collections.unmodifiableList(new ArrayList<>(consumerQueue));
     }
 
 
     public void close() {
         isClose.compareAndSet(false, true);
-        long doubleMs = workerIntervalMs * 2L;
+        long doubleMs = consumerIntervalMs * 2L;
         log.info("WAL close waiting ms = {}", doubleMs);
         try {
             TimeUnit.MILLISECONDS.sleep(doubleMs);
@@ -428,6 +453,13 @@ public abstract class AbstractWal<D> {
 
     }
 
+    public boolean inputData(Collection<D> dataList) throws IllegalAccessException {
+        for (D data : dataList) {
+            inputData(data);
+        }
+        return true;
+    }
+
     /**
      * 写入数据
      *
@@ -449,8 +481,8 @@ public abstract class AbstractWal<D> {
     }
 
     private void addDataToMemory(D data) {
-        dataQueue.add(data);
-        walFileDataQueue.add(data);
+        consumerQueue.add(data);
+        producerQueue.add(data);
     }
 
     /**

@@ -1,15 +1,22 @@
-package com.neko233.toolchain.compress;
+package com.neko233.toolchain.compress.zip;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
  * Zip 压缩/解压缩
  */
+@Slf4j
 public class ZipUtils233 {
 
     /**
@@ -22,7 +29,7 @@ public class ZipUtils233 {
         try {
             File file = new File(filePath);
             String zipFileName = file.getName().concat(".zip");
-            System.out.println("zipFileName:" + zipFileName);
+            log.info("zipFileName:" + zipFileName);
 
             // if you want change the menu of output ,just fix here
             // FileOutputStream fos = new FileOutputStream(zipFileName);
@@ -40,7 +47,7 @@ public class ZipUtils233 {
         } catch (FileNotFoundException ex) {
             System.err.format("The file %s does not exist", filePath);
         } catch (IOException ex) {
-            System.err.println("I/O error: " + ex);
+            log.error("I/O error: " + ex);
         }
     }
 
@@ -68,9 +75,9 @@ public class ZipUtils233 {
             zos.close();
 
         } catch (FileNotFoundException ex) {
-            System.err.println("A file does not exist: " + ex);
+            log.error("A file does not exist: " + ex);
         } catch (IOException ex) {
-            System.err.println("I/O error: " + ex);
+            log.error("I/O error: " + ex);
         }
     }
 
@@ -129,5 +136,49 @@ public class ZipUtils233 {
         bos.close();
     }
 
+    /**
+     * 不解压读取 zip file 中的内容
+     *
+     * @param zipFilePath zipFile 全路径
+     */
+    public static List<ZipMetadata> readMetadataFromZipFile(String zipFilePath) {
+        try {
+            ZipFile zipFile = new ZipFile(zipFilePath);
+
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+            List<ZipMetadata> zipMetadataList = new ArrayList<>();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+
+                String name = entry.getName();
+                String type = entry.isDirectory() ? "DIR" : "FILE";
+                long crc = entry.getCrc();
+                long compressedSize = entry.getCompressedSize();
+                long normalSize = entry.getSize();
+                long createTimeMs = entry.getCreationTime().toMillis();
+                long lastModifiedTimeMs = entry.getLastModifiedTime().toMillis();
+
+                log.info("zip metadata. file Name = {}, type = {}, compressSize = {}, normalSize = {}", name, type, compressedSize, normalSize);
+                zipMetadataList.add(ZipMetadata.builder()
+                        .name(name)
+                        .type(type)
+                        .crc(crc)
+                        .compressedSize(compressedSize)
+                        .normalSize(normalSize)
+                        .createTimeMs(createTimeMs)
+                        .lastModifiedTimeMs(lastModifiedTimeMs)
+                        .build()
+                );
+            }
+
+            zipFile.close();
+
+            return zipMetadataList;
+        } catch (IOException ex) {
+            log.error("get zip file metadata error", ex);
+            throw new RuntimeException(ex);
+        }
+    }
 
 }

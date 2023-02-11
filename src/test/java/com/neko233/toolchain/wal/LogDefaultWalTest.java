@@ -1,13 +1,15 @@
 package com.neko233.toolchain.wal;
 
+import com.neko233.toolchain.common.base.ListGenerator233;
 import com.neko233.toolchain.common.base.PreconditionUtils233;
 import com.neko233.toolchain.common.base.TimeCostUtils233;
 import com.neko233.toolchain.testDto.TestDto;
-import com.neko233.toolchain.wal.impl.LogDefaultWal;
+import com.neko233.toolchain.wal.impl.LogDefaultWalV1;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * @author SolarisNeko
@@ -16,14 +18,14 @@ import java.io.File;
 @Slf4j
 public class LogDefaultWalTest {
 
-//    @Test
+    @Test
     public void testSpeed() throws InterruptedException, IllegalAccessException {
         final File file = new File("/Users/samo/Desktop/Log/Test-WAL/test-1/demo.data");
 
-        AbstractWal<TestDto> wal = null;
+        AbstractWalV1<TestDto> wal = null;
         try {
             int count = 0;
-            wal = new LogDefaultWal<>(file, TestDto.class);
+            wal = new LogDefaultWalV1<>(file, TestDto.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -32,20 +34,19 @@ public class LogDefaultWalTest {
 
 
         long ms = TimeCostUtils233.executeFunctionSpendMs((tempWal) -> {
-            for (int i = 0; i < 10000 * 10; i++) {
-                TestDto testDto = new TestDto(String.valueOf(i));
-                try {
-                    tempWal.inputData(testDto);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+            List<TestDto> testDtos = ListGenerator233.generateObjectByCount(100 * 1000, (i) -> new TestDto(String.valueOf(i)));
+
+            try {
+                tempWal.inputData(testDtos);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
         }, wal);
 
 
-        Thread.sleep(5 * 1000);
+        Thread.sleep(10 * 1000);
 
         // 10w data, 32 ms done
-        log.info("ms = {}", ms);
+        log.info("write to WAL spend ms = {}", ms);
     }
 }

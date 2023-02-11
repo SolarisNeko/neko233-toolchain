@@ -1,6 +1,7 @@
 package com.neko233.toolchain.wal;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.neko233.toolchain.common.file.FileUtils233;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 @AllArgsConstructor
 @Builder
 @Slf4j
-public class WalMetadata {
+public class WalMetadataV1 {
 
     public static final long BEGIN_NUMBER = 1;
     public static final long MAX_SEQUENCE_ID = 50;
@@ -32,8 +33,8 @@ public class WalMetadata {
     private File currentWalFile;
     private long previousFlushMs;
 
-    public static WalMetadata createFirst(String fileTemplate) {
-        return WalMetadata.builder()
+    public static WalMetadataV1 createFirst(String fileTemplate) {
+        return WalMetadataV1.builder()
                 .currentSequenceId(BEGIN_NUMBER)
                 .fileTemplate(fileTemplate)
                 .currentWalFile(new File(fileTemplate + "." + BEGIN_NUMBER))
@@ -54,7 +55,7 @@ public class WalMetadata {
      * @return 更新后的 metadata
      * @throws IOException IO 异常
      */
-    public WalMetadata nextSequence() throws IOException {
+    public WalMetadataV1 nextSequence() throws IOException {
         this.currentSequenceId += 1;
         // loop
         if (this.currentSequenceId > getMaxSequenceId()) {
@@ -80,12 +81,12 @@ public class WalMetadata {
      *
      * @param dataFile dataFile
      */
-    public void writeAheadLogToFile(final File dataFile) {
+    public void flushMetadataToFile(final File dataFile) {
         if (dataFile == null) {
             log.error("why your WAL data file is null ? please check.");
             return;
         }
-        String json = JSON.toJSONString(this);
+        String json = JSON.toJSONString(this, JSONWriter.Feature.PrettyFormat);
         try {
             FileUtils233.write(dataFile, json, StandardCharsets.UTF_8, false);
         } catch (IOException e) {
@@ -106,8 +107,9 @@ public class WalMetadata {
     }
 
 
-    public void updateCurrentWalFile(File walFile) throws IOException {
+    public void resetCurrentWalFile(File walFile) throws IOException {
         this.currentWalFile = walFile;
         FileUtils233.createFileIfNotExists(walFile);
     }
+
 }

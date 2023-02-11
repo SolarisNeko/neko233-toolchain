@@ -10,6 +10,25 @@ import java.text.ParseException;
 public class NumberUtils233 {
 
 
+    public static long addLongIdByLoop(long currentSequenceId, long beginNumber, long endNumber) {
+        long temp = currentSequenceId + 1;
+        // loop
+        temp = temp > endNumber ? beginNumber : temp;
+        return temp;
+    }
+
+
+    public static long getLongIdByLoop(long currentSequenceId, long beginNumber, long endNumber) {
+        long diff = endNumber - beginNumber;
+        long temp = currentSequenceId;
+        // loop
+        temp = temp < beginNumber ?  endNumber - Math.abs(temp) % diff + 1 : temp;
+        temp = temp > endNumber ? beginNumber : temp;
+        return temp;
+    }
+
+
+
     public static BigDecimal round(Number number, int scale, RoundingMode roundingMode) {
         return round(number.doubleValue(), scale, roundingMode);
     }
