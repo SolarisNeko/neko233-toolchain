@@ -2,22 +2,15 @@ package com.neko233.toolchain.validator.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * 文本非空
+ */
 @Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidateNumber {
+public @interface NotBlank {
 
     String tips() default "";
-
-    /**
-     * 最小值
-     */
-    int min();
-
-    /**
-     * 最大值
-     */
-    int max();
 
 }
 

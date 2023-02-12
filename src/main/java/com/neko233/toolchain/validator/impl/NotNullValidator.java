@@ -1,4 +1,4 @@
-package com.neko233.toolchain.validator.impl.my;
+package com.neko233.toolchain.validator.impl;
 
 import com.neko233.toolchain.common.base.StringUtils233;
 import com.neko233.toolchain.validator.ValidateApi;
@@ -24,10 +24,7 @@ public class NotNullValidator implements ValidateApi<NotNull, Object> {
 
     @Override
     public String getReason(NotNull annotation, String fieldName, Object fieldValue) {
-        if (StringUtils233.isNotBlank(annotation.tips())) {
-            return annotation.tips();
-        }
-        return StringUtils233.format("field = {}. value is null", fieldName, annotation.tips());
+        return StringUtils233.format("tips = {}. field = {}. value is {}", annotation.tips(), fieldName, fieldValue);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.neko233.toolchain.db;
+package com.neko233.mock.db;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +40,7 @@ public interface DataSourceMock {
         }
 
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement("create database demo");
+            PreparedStatement ps = connection.prepareStatement("create database if not exists demo");
             ps.executeUpdate();
         } catch (SQLException e) {
         }

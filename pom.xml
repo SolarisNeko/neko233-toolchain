@@ -5,7 +5,7 @@
 
     <groupId>com.neko233</groupId>
     <artifactId>neko233-toolchain</artifactId>
-    <version>0.4.1</version>
+    <version>0.5.0</version>
 
 
     <name>neko233-toolchain</name>
@@ -174,29 +174,24 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- protobuf -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.google.protobuf</groupId>-->
-        <!--            <artifactId>protobuf-java</artifactId>-->
-        <!--            <version>3.21.7</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.google.protobuf</groupId>-->
-        <!--            <artifactId>protobuf-java-util</artifactId>-->
-        <!--            <version>3.21.7</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.36</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.36</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Post Processor -->
         <dependency>
             <groupId>org.realityforge.org.jetbrains.annotations</groupId>
             <artifactId>org.jetbrains.annotations</artifactId>
             <version>1.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-            <version>3.0.2</version>
         </dependency>
 
     </dependencies>

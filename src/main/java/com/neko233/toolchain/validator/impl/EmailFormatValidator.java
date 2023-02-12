@@ -1,21 +1,24 @@
-package com.neko233.toolchain.validator.impl.my;
+package com.neko233.toolchain.validator.impl;
 
 import com.neko233.toolchain.common.base.StringUtils233;
 import com.neko233.toolchain.validator.ValidateApi;
-import com.neko233.toolchain.validator.annotation.ValidateEmailFormat;
+import com.neko233.toolchain.validator.annotation.EmailFormat;
 
 /**
  * ValidateEmailFormat Validator
  */
-public class ValidateEmailFormatValidator implements ValidateApi<ValidateEmailFormat, Object> {
+public class EmailFormatValidator implements ValidateApi<EmailFormat, Object> {
 
     @Override
-    public Class<? extends ValidateEmailFormat> getAnnotationType() {
-        return ValidateEmailFormat.class;
+    public Class<? extends EmailFormat> getAnnotationType() {
+        return EmailFormat.class;
     }
 
     @Override
-    public boolean validateOk(ValidateEmailFormat annotation, Object fieldValue) {
+    public boolean validateOk(EmailFormat annotation, Object fieldValue) {
+        if (fieldValue == null) {
+            return false;
+        }
         String emailString = String.valueOf(fieldValue);
 
         String[] emailSuffixList = annotation.emailSuffix();
@@ -43,7 +46,7 @@ public class ValidateEmailFormatValidator implements ValidateApi<ValidateEmailFo
     }
 
     @Override
-    public String getReason(ValidateEmailFormat annotation, String fieldName, Object fieldValue) {
+    public String getReason(EmailFormat annotation, String fieldName, Object fieldValue) {
         return StringUtils233.format("tips = {}. field = {}. value is {}", annotation.tips(), fieldName, fieldValue);
     }
 

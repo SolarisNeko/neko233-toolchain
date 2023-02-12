@@ -18,9 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Validator233 {
 
+    private static boolean isInit = false;
     public static final Map<Class<?>, Map<Field, List<ValidateApi>>> classValidateCache = new ConcurrentHashMap<>();
 
     public static ValidateContext validate(Object object) {
+        if (!isInit) {
+            initByLock();
+        }
         if (object == null) {
             return ValidateContext.builder()
                     .isOk(false)
@@ -75,8 +79,21 @@ public class Validator233 {
                 .build();
     }
 
-    public static void scanPackage(String classPath) {
-        ValidateApiFactory.scanPackageToRegister(classPath);
+    /**
+     * 初始化原生校验器
+     */
+    private static void initByLock() {
+        synchronized (Validator233.class) {
+            if (isInit) {
+                return;
+            }
+            isInit = true;
+            registerByScan(Validator233.class.getPackage().getName());
+        }
+    }
+
+    public static void registerByScan(String packagePath) {
+        ValidateApiFactory.registerByScanPackage(packagePath);
     }
 
     private static synchronized void createValidateApi(Object build) {

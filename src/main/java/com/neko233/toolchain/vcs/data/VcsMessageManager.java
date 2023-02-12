@@ -16,15 +16,15 @@ import java.util.stream.Collectors;
  * @author SolarisNeko on 2023-01-01
  */
 @Slf4j
-public class UserVcsDataManager<T> {
+public class VcsMessageManager<T> {
 
 
     private int maxSize;
     private final Map<String, Integer> versionNumberMap;
 
-    private final Map<String, LinkedList<VcsData<T>>> vcsDataRouteMap;
+    private final Map<String, LinkedList<VcsMessage<T>>> vcsDataRouteMap;
 
-    public UserVcsDataManager() {
+    public VcsMessageManager() {
         this.maxSize = 20;
         this.versionNumberMap = new ConcurrentHashMap<>();
         this.vcsDataRouteMap = new ConcurrentHashMap<>();
@@ -33,19 +33,19 @@ public class UserVcsDataManager<T> {
 
     public int add(String routePath, T data) {
         synchronized (this) {
-            LinkedList<VcsData<T>> vcsDataList = vcsDataRouteMap.computeIfAbsent(routePath, k -> new LinkedList<>());
+            LinkedList<VcsMessage<T>> vcsMessageList = vcsDataRouteMap.computeIfAbsent(routePath, k -> new LinkedList<>());
             int newVersion = versionNumberMap.merge(routePath, 1, (v1, v2) -> v1 + 1);
 
-            final VcsData<T> vcsData = (VcsData<T>) VcsData.builder()
+            final VcsMessage<T> vcsMessage = (VcsMessage<T>) VcsMessage.builder()
                     .routePath(routePath)
                     .version(newVersion)
                     .data(data)
                     .build();
 
-            if (vcsDataList.size() >= maxSize) {
-                vcsDataList.removeFirst();
+            if (vcsMessageList.size() >= maxSize) {
+                vcsMessageList.removeFirst();
             }
-            vcsDataList.add(vcsData);
+            vcsMessageList.add(vcsMessage);
 
             // 版本
             return newVersion;
@@ -59,10 +59,10 @@ public class UserVcsDataManager<T> {
      * @param clientHoldServerVersion 客户端持有 server 的版本号
      * @return client.server.version 和 server.server.version 差异版本的消息
      */
-    public List<VcsData<T>> getDiffVcsDataList(String routePath, Integer clientHoldServerVersion)
+    public List<VcsMessage<T>> getDiffVcsDataList(String routePath, Integer clientHoldServerVersion)
             throws VersionDiffTooLargeException {
         synchronized (this) {
-            LinkedList<VcsData<T>> vcsDataList = vcsDataRouteMap.computeIfAbsent(routePath, k -> new LinkedList<>());
+            LinkedList<VcsMessage<T>> vcsMessageList = vcsDataRouteMap.computeIfAbsent(routePath, k -> new LinkedList<>());
             Integer serverEndVersion = versionNumberMap.getOrDefault(routePath, 1);
 
             if (clientHoldServerVersion == null) {
@@ -71,19 +71,19 @@ public class UserVcsDataManager<T> {
             if (clientHoldServerVersion.equals(serverEndVersion)) {
                 return null;
             }
-            if (vcsDataList.isEmpty()) {
+            if (vcsMessageList.isEmpty()) {
                 return null;
             }
 
-            int serverStartVersion = vcsDataList.getFirst().getVersion();
+            int serverStartVersion = vcsMessageList.getFirst().getVersion();
             if (serverStartVersion > clientHoldServerVersion || clientHoldServerVersion > serverEndVersion) {
                 log.error("vcs data manager, version diff too large. client.server.version = {}, server.head.version = {}, server.end.version = {}"
                         , clientHoldServerVersion, serverStartVersion, serverEndVersion);
                 throw new VersionDiffTooLargeException();
             }
 
-            return vcsDataList.stream()
-                    .filter(vcsData -> vcsData.getVersion() >= clientHoldServerVersion)
+            return vcsMessageList.stream()
+                    .filter(vcsMessage -> vcsMessage.getVersion() >= clientHoldServerVersion)
                     .collect(Collectors.toList());
         }
     }

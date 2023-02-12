@@ -1,6 +1,6 @@
 package com.neko233.toolchain.idGenerator.rds;
 
-import com.neko233.toolchain.db.DataSourceMock;
+import com.neko233.mock.db.DataSourceMock;
 import com.neko233.toolchain.idGenerator.IdGenerator;
 import com.neko233.toolchain.idGenerator.IdGeneratorException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IdGeneratorByRdsTest {
 
     DataSource dataSource = DataSourceMock.createDataSource();
-
     private String createFirstBusinessName(String demo) {
         return demo + "|" + LocalDateTime.now();
     }

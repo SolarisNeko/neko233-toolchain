@@ -3,6 +3,14 @@
 # RoadMap
 
 ## version
+
+### v0.5.0
+deploy v0.5.0
+1. [Add] VcsMessage 版本号消息 & 差异应用
+2. [Add] Validator233 . 完善校验器
+3. [Add] add data struct 一些数据结构
+4. [Delete] 删除 jakarta-validation-api 包, 不纳入默认实现, 采用 neko233 自己的 @annotation
+
 ### v0.4.1
 1. [Add] TimeCostUtils233 时间计时工具
 2. [Add] Abstract WAL 抽象WAL 

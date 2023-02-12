@@ -2,20 +2,21 @@ package com.neko233.toolchain.validator.impl.my;
 
 import com.neko233.toolchain.validator.ValidateContext;
 import com.neko233.toolchain.validator.Validator233;
-import com.neko233.toolchain.validator.annotation.ValidateNumber;
+import com.neko233.toolchain.validator.annotation.Number;
+import com.neko233.toolchain.validator.impl.NumberValidator;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class NumberValidator233Test {
 
     class Demo {
-        @ValidateNumber(min = 1, max = 99)
+        @Number(min = 1, max = 99)
         public int count;
     }
 
     @Test
     public void testTrue() {
-        Validator233.scanPackage(NumberValidator.class.getPackage().getName());
+        Validator233.registerByScan(NumberValidator.class.getPackage().getName());
         Demo demo = new Demo();
         demo.count = 86;
 
@@ -25,7 +26,7 @@ public class NumberValidator233Test {
 
     @Test
     public void testFailure() {
-        Validator233.scanPackage(NumberValidator.class.getPackage().getName());
+        Validator233.registerByScan(NumberValidator.class.getPackage().getName());
         Demo demo = new Demo();
         demo.count = 101;
 

@@ -1,7 +1,7 @@
 package com.neko233.toolchain.impl;
 
 import com.neko233.toolchain.counter.CounterApi;
-import com.neko233.toolchain.db.DataSourceMock;
+import com.neko233.mock.db.DataSourceMock;
 import com.neko233.toolchain.counter.impl.CounterApiByRds;
 import org.junit.Assert;
 import org.junit.Test;

@@ -7,20 +7,39 @@ import com.neko233.toolchain.testDto.TestDto;
 import com.neko233.toolchain.wal.impl.LogDefaultWalV1;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author SolarisNeko
  * Date on 2023-01-28
  */
 @Slf4j
+@BenchmarkMode(Mode.AverageTime)
+@State(Scope.Thread)
+@Fork(1)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 3)
+@Measurement(iterations = 5)
 public class LogDefaultWalTest {
+    public static void main(String[] args) throws RunnerException {
+        Options jmhOptions = new OptionsBuilder()
+                .include(LogDefaultWalTest.class.getSimpleName())
+                .build();
+        Runner jmhRunner = new Runner(jmhOptions);
+        jmhRunner.run();
+    }
 
-    @Test
+    @Benchmark
     public void testSpeed() throws InterruptedException, IllegalAccessException {
-        final File file = new File("/Users/samo/Desktop/Log/Test-WAL/test-1/demo.data");
+        final File file = new File("/Users/neko233/Desktop/Log/Test-WAL/test-1/demo.data");
 
         AbstractWalV1<TestDto> wal = null;
         try {

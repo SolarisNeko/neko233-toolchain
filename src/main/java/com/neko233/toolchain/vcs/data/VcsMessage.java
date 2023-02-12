@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class VcsData<T> {
+public class VcsMessage<T> {
 
     private final String routePath;
     private final int version;
