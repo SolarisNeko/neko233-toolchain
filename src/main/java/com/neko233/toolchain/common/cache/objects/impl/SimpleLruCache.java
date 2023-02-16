@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @param <K> key
  * @param <V> value
- * @author LuoHaoJun
+ * @author SolarisNeko
  */
 @ThreadNotSafe
 public class SimpleLruCache<K, V> extends LinkedHashMap<K, V> {

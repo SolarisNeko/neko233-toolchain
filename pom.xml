@@ -5,7 +5,7 @@
 
     <groupId>com.neko233</groupId>
     <artifactId>neko233-toolchain</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 
 
     <name>neko233-toolchain</name>
@@ -13,7 +13,18 @@
 
     <description>
         neko233-toolchain is used to resolve common problem.
-        基本库. 用于解决常见通用问题 and 制定 API 规范.
+
+        and create some utils like use in SpringBoot / Ktor / ...
+
+        携带常用工具库 + 补充工具库(命名后缀: 233)
+
+        定位: 类似 Guava / Apache Commons. 同时还有 SpringBoot/Ktor Style Utils
+
+        同时, 将 SpringBoot 一些不错的机制(validation, AOP, 等), 也实现了一遍～
+
+        Bring elegance back to JVM !
+
+        ps: default support to JVM-1.8
     </description>
 
     <developers>
@@ -42,8 +53,8 @@
 
     <properties>
         <java.version>8</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
         <github.global.server>github</github.global.server>
-        <maven.compiler.source>1.8</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <gpg.executable>gpg</gpg.executable>
@@ -185,6 +196,11 @@
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>1.36</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.neko233</groupId>
+            <artifactId>sql-light-rail</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- Post Processor -->

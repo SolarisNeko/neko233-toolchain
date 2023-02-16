@@ -4,6 +4,12 @@
 
 ## version
 
+### v0.6.0
+deploy v0.6.0
+1. [Add] cache/async 异步 DAO 的读写方案.
+2. [Add] Actor 的 Java 模型, 相比传统 Actor, 提供了 Actor LoadBalance 机制, 避免了 thread hungry problem
+3. [Add] AOP 机制. 相比传统 AOP, 集成了 with retry
+
 ### v0.5.0
 deploy v0.5.0
 1. [Add] VcsMessage 版本号消息 & 差异应用
