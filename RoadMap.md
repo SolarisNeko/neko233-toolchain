@@ -4,6 +4,14 @@
 
 ## version
 
+### v0.6.1
+1. [Add] [Compress] 压缩工具, Huffman
+2. [Add] [Compress] 压缩日期, punchDate
+3. [Add] [Encrypt] Rsa / Salt 
+4. [Add] [File] BigFileSplitUtils233
+5. [Rename] [API] dao -> dao_api
+6. [Format] [Constant] CharPool..
+
 ### v0.6.0
 deploy v0.6.0
 1. [Add] cache/async 异步 DAO 的读写方案.

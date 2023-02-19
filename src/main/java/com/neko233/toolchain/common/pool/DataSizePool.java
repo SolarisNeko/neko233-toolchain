@@ -1,5 +1,8 @@
 package com.neko233.toolchain.common.pool;
 
+/**
+ * 数据格式, 文本 Pool
+ */
 public interface DataSizePool {
 
     String Byte = "Byte";

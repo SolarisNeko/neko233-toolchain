@@ -1,12 +1,12 @@
-package com.neko233.toolchain.dao.async.impl;
+package com.neko233.toolchain.dao_api.async.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.neko233.mock.db.DataSourceMock;
 import com.neko233.sql.lightrail.orm.OrmHandler;
-import com.neko233.toolchain.dao.async.AbstractCacheDataSyncDao;
-import com.neko233.toolchain.dao.async.DataSyncScheduleParamDto;
-import com.neko233.toolchain.dao.async.DataUniqueId;
-import com.neko233.toolchain.dao.async.DemoSyncDataUser;
+import com.neko233.toolchain.dao_api.async.AbstractCacheDataSyncDao;
+import com.neko233.toolchain.dao_api.async.DataSyncScheduleParamDto;
+import com.neko233.toolchain.dao_api.async.DataUniqueId;
+import com.neko233.toolchain.dao_api.async.DemoSyncDataUser;
 import com.neko233.toolchain.common.base.CollectionUtils233;
 import com.neko233.toolchain.common.base.KvTemplate;
 import com.neko233.toolchain.idGenerator.snowflake.IdGeneratorBySnowflake;

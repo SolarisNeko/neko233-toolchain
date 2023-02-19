@@ -1,4 +1,4 @@
-package com.neko233.toolchain.dao.async;
+package com.neko233.toolchain.dao_api.async;
 
 import com.neko233.toolchain.common.base.StringUtils233;
 import lombok.AllArgsConstructor;
