@@ -4,6 +4,10 @@
 
 ## version
 
+### v0.6.2
+1. [Add] BitUtils233 bit 工具.
+2. [Optimize] FunctionText233 优化复杂情况
+
 ### v0.6.1
 1. [Add] [Compress] 压缩工具, Huffman
 2. [Add] [Compress] 压缩日期, punchDate

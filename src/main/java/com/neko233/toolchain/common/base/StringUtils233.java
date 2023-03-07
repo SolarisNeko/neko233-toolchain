@@ -392,7 +392,7 @@ public class StringUtils233 {
      * 转义{}： format("this is \\{} for {}", "{}", "a", "b") =》 this is {} for a<br>
      * 转义\： format("this is \\\\{} for {}", "{}", "a", "b") =》 this is \a for b<br>
      *
-     * @param pattern  字符串模板
+     * @param pattern     字符串模板
      * @param placeHolder 占位符，例如{}
      * @param argArray    参数列表
      * @return 结果
@@ -702,7 +702,6 @@ public class StringUtils233 {
     }
 
 
-
     public static boolean isNotNumber(String str) {
         return !isNumber(str);
     }
@@ -814,6 +813,7 @@ public class StringUtils233 {
 
     /**
      * \"abc\" -> abc
+     *
      * @param stringText 文本, \" will delete | 如果还要表示文本, 使用 'abc'
      * @return just a string object
      */
@@ -821,4 +821,29 @@ public class StringUtils233 {
         return Optional.ofNullable(stringText).orElse("")
                 .replaceAll("\"", "");
     }
+
+
+    /**
+     * 每隔多少步, 加入一些
+     * @param string
+     * @param step
+     * @return
+     */
+    public static String joinByStep(String string, Integer step, String joiner) {
+        if (StringUtils233.isBlank(string)) {
+            return "";
+        }
+        if (step <= 0) {
+            return string;
+        }
+        StringBuilder concatBuilder = new StringBuilder();
+        for (int i = 0; i < string.length(); i = i + step) {
+            concatBuilder.append(string, i, i + step).append(joiner);
+            if (i + step >= string.length()) {
+                concatBuilder.delete(concatBuilder.length() - 1, concatBuilder.length());
+            }
+        }
+        return concatBuilder.toString();
+    }
+
 }
