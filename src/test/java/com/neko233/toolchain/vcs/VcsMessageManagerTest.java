@@ -2,9 +2,9 @@ package com.neko233.toolchain.vcs;
 
 import com.neko233.toolchain.common.base.CollectionUtils233;
 import com.neko233.toolchain.testDto.TestDto;
-import com.neko233.toolchain.vcs.data.VcsMessage;
-import com.neko233.toolchain.vcs.data.VcsMessageManager;
-import com.neko233.toolchain.vcs.data.VersionDiffTooLargeException;
+import com.neko233.toolchain.vcs.vscMessage.VcsMessageManager;
+import com.neko233.toolchain.vcs.vscMessage.data.VcsMessage;
+import com.neko233.toolchain.vcs.vscMessage.exception.VersionDiffTooLargeException;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package com.neko233.toolchain.common.parser.number;
 
-import com.neko233.toolchain.parser.number.MathTextCalculator233;
+import com.neko233.toolchain.explainer.number.MathTextCalculator233;
 import org.junit.Test;
 
 import java.math.BigDecimal;

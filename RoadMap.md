@@ -4,6 +4,11 @@
 
 ## version
 
+### v1.0.0
+1. [Add] Terminal 终端操作
+2. [Refactor] 调整包名
+3. [Add] Kv API
+
 ### v0.6.2
 1. [Add] BitUtils233 bit 工具.
 2. [Optimize] FunctionText233 优化复杂情况

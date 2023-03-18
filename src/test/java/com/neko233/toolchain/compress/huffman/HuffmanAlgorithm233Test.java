@@ -1,5 +1,7 @@
 package com.neko233.toolchain.compress.huffman;
 
+import com.neko233.toolchain.common.compress.huffman.HuffmanAlgorithm233;
+import com.neko233.toolchain.common.compress.huffman.HuffmanResult;
 import org.junit.Assert;
 import org.junit.Test;
 

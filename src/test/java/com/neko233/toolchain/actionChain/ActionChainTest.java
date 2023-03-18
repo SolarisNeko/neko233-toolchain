@@ -1,6 +1,6 @@
 package com.neko233.toolchain.actionChain;
 
-import com.neko233.toolchain.actionChain.ActionChain;
+import com.neko233.toolchain.action.actionChain.ActionChain;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
