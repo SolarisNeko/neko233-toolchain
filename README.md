@@ -20,13 +20,13 @@ ps: default support to JVM-1.8
 <dependency>
    <groupId>com.neko233</groupId>
    <artifactId>neko233-toolchain</artifactId>
-   <version>0.6.2</version>
+   <version>1.0.0</version>
 </dependency>
 ```
 
 ## Gradle
 ```kotlin
-implementation("com.neko233:neko233-toolchain:0.6.2")
+implementation("com.neko233:neko233-toolchain:1.0.0")
 ```
 
 定位: 开箱即用的常用包依赖.
