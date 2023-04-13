@@ -1,6 +1,7 @@
 package com.neko233.toolchain.explainer.number;
 
 import com.alibaba.fastjson2.JSON;
+import com.neko233.toolchain.common.base.KvTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,8 +59,19 @@ public class MathTextCalculator233 {
     private static final String SPACE = "\\s";
 
 
+    public static BigDecimal executeExpressionByTemplate(String calExpressionTemplate, Map<String, Object> kvMap) throws Exception {
+        return executeExpressionByTemplate(calExpressionTemplate, kvMap, 2);
+    }
+
+    public static BigDecimal executeExpressionByTemplate(String calExpressionTemplate, Map<String, Object> kvMap, int scaleSize) throws Exception {
+        String calExpression = KvTemplate.builder(calExpressionTemplate)
+                .put(kvMap)
+                .build();
+        return executeExpression(calExpression, scaleSize, BigDecimal.ROUND_HALF_DOWN);
+    }
+
     public static BigDecimal executeExpression(String calExpressionStr, int scaleSize) throws Exception {
-        return executeExpression(calExpressionStr, scaleSize, BigDecimal.ROUND_HALF_UP);
+        return executeExpression(calExpressionStr, scaleSize, BigDecimal.ROUND_HALF_DOWN);
     }
 
     /**
@@ -76,14 +88,14 @@ public class MathTextCalculator233 {
     }
 
     /**
-     * 计算值 10 位小数 0 去掉
+     * 计算表达式
      *
-     * @param calExpressionStr 数学公式文本
+     * @param calExpressionText 数学公式文本
      * @return 计算结果
-     * @throws Exception
+     * @throws Exception 任意异常
      */
-    public static BigDecimal executeExpression(String calExpressionStr) throws Exception {
-        return executeExpression(calExpressionStr, 2);
+    public static BigDecimal executeExpression(String calExpressionText) throws Exception {
+        return executeExpression(calExpressionText, 2);
     }
 
     /**
@@ -111,8 +123,8 @@ public class MathTextCalculator233 {
     /**
      * 生成中序表达式 list
      *
-     * @param calExpressionStr
-     * @return
+     * @param calExpressionStr 表达式
+     * @return 中缀表达式 token List
      */
     private static List<String> getInorderExpressionList(String calExpressionStr) {
         // 生成 中序表达式 list

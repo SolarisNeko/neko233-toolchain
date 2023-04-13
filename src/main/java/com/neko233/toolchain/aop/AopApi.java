@@ -25,7 +25,8 @@ public interface AopApi {
      * @param target 调用对象
      * @param args   参数
      */
-    void preHandle(Method method, Object target, Object[] args);
+    default void preHandle(Method method, Object target, Object[] args) {
+    }
 
 
     default int retryCountOnError() {
@@ -46,7 +47,8 @@ public interface AopApi {
      * @param target 调用对象
      * @param args   参数
      */
-    void postHandle(Method method, Object target, Object[] args);
+    default void postHandle(Method method, Object target, Object[] args) {
+    }
 
 
 }

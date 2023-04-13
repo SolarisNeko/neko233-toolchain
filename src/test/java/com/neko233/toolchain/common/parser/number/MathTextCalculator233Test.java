@@ -1,9 +1,11 @@
 package com.neko233.toolchain.common.parser.number;
 
+import com.neko233.toolchain.common.base.MapUtils233;
 import com.neko233.toolchain.explainer.number.MathTextCalculator233;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,6 +14,20 @@ import static org.junit.Assert.assertEquals;
  * Date on 2023-01-29
  */
 public class MathTextCalculator233Test {
+
+
+    @Test
+    public void test_math_by_template() throws Exception {
+        final String mathTemplate = " ${attack} * 3 * ${userLevel} ";
+
+        Map<String, Object> kvMap = MapUtils233.of(
+                "attack", 3,
+                "userLevel", 10
+        );
+
+        BigDecimal bigDecimal = MathTextCalculator233.executeExpressionByTemplate(mathTemplate, kvMap);
+        assertEquals("90.00", bigDecimal.toString());
+    }
 
     @Test
     public void t1_multi() throws Exception {
@@ -50,6 +66,9 @@ public class MathTextCalculator233Test {
         assertEquals("4.00", bigDecimal.toString());
     }
 
+    /**
+     * 开 3 次方根号
+     */
     @Test
     public void t6_sqrt_n_count() throws Exception {
         String mathStr = "3/-81  ";

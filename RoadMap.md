@@ -4,10 +4,21 @@
 
 ## version
 
+### v1.1.0
+1. [Add] 在 JDK 8 基础下, 实现了 JDK 11+ 的 List.of / Map.of 效果. 见 MapUtils233, CollectionUtils
+2. [Add] MathTextCalculator233 追加模板计算, 实现超复杂的动态上下文数据提供的科学数学运算~
+3. [Add] KvTemplate 追加反向解析, 优化性能~
+4. [Add] 行数据库 RowDataBase, 列数据库 ColumnDatabase, 逆向索引 InvertedIndex, 多版本并发控制 MvccMemoryDatabase
+5. [Add] AopProxy233 动态代理
+6. [Add] Raft API
+7. [Add] 2PC API 
+
 ### v1.0.0
 1. [Add] Terminal 终端操作
 2. [Refactor] 调整包名
 3. [Add] Kv API
+
+-----------
 
 ### v0.6.2
 1. [Add] BitUtils233 bit 工具.

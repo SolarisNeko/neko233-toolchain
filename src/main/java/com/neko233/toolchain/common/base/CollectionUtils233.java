@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CollectionUtils233 {
 
@@ -67,6 +68,34 @@ public class CollectionUtils233 {
             throw new IllegalArgumentException(name + " cannot be negative but was: " + value);
         }
         return value;
+    }
+
+    /**
+     * 模拟 JDK 11+ 的 List.of
+     *
+     * @param objs 对象
+     * @return List
+     */
+    @SafeVarargs
+    public static <V> List<V> ofList(V... objs) {
+        if (objs == null) {
+            return new ArrayList<>(0);
+        }
+        return Arrays.stream(objs).collect(Collectors.toList());
+    }
+
+    /**
+     * 模拟 JDK 11+ 的 Set.of
+     *
+     * @param objs 对象
+     * @return Set
+     */
+    @SafeVarargs
+    public static <V> Set<V> ofSet(V... objs) {
+        if (objs == null) {
+            return new HashSet<>(0);
+        }
+        return Arrays.stream(objs).collect(Collectors.toSet());
     }
 
 }
