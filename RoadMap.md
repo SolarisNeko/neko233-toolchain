@@ -2,7 +2,11 @@
 
 # RoadMap
 
+
 ## version
+
+### v1.1.1
+1. [BugFix] KvTemplate Bug
 
 ### v1.1.0
 1. [Add] 在 JDK 8 基础下, 实现了 JDK 11+ 的 List.of / Map.of 效果. 见 MapUtils233, CollectionUtils

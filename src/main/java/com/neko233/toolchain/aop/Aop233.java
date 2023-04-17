@@ -5,12 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.function.Supplier;
 
 /**
  * @author SolarisNeko on 2022-01-01
  */
 @Slf4j
-public class AopProxy233 {
+public class Aop233 {
 
     public static <T> T proxy(T target, AopApi aopApi) {
         if (target == null) {
@@ -59,11 +60,11 @@ public class AopProxy233 {
         Annotation[] annotations = clazz.getAnnotations();
         AopApi targetAopApi = null;
         for (Annotation annotation : annotations) {
-            AopApi aopApi = AopAnnotationMap233.get(annotation);
+            Supplier<AopApi> aopApi = AopAnnotationFactory233.singleton.get(annotation);
             if (aopApi == null) {
                 continue;
             }
-            targetAopApi = aopApi;
+            targetAopApi = aopApi.get();
         }
 
         if (targetAopApi == null) {

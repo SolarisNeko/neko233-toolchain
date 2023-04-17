@@ -1,7 +1,7 @@
 package com.neko233.toolchain.explainer.number;
 
 import com.alibaba.fastjson2.JSON;
-import com.neko233.toolchain.common.base.KvTemplate;
+import com.neko233.toolchain.common.base.KvTemplate233;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +64,7 @@ public class MathTextCalculator233 {
     }
 
     public static BigDecimal executeExpressionByTemplate(String calExpressionTemplate, Map<String, Object> kvMap, int scaleSize) throws Exception {
-        String calExpression = KvTemplate.builder(calExpressionTemplate)
+        String calExpression = KvTemplate233.builder(calExpressionTemplate)
                 .put(kvMap)
                 .build();
         return executeExpression(calExpression, scaleSize, BigDecimal.ROUND_HALF_DOWN);

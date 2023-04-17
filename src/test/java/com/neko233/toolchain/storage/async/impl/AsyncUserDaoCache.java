@@ -8,7 +8,7 @@ import com.neko233.toolchain.storage.async.DataSyncScheduleParamDto;
 import com.neko233.toolchain.storage.async.DataUniqueId;
 import com.neko233.toolchain.storage.async.DemoSyncDataUser;
 import com.neko233.toolchain.common.base.CollectionUtils233;
-import com.neko233.toolchain.common.base.KvTemplate;
+import com.neko233.toolchain.common.base.KvTemplate233;
 import com.neko233.toolchain.idGenerator.snowflake.IdGeneratorBySnowflake;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,7 +58,7 @@ public class AsyncUserDaoCache extends AbstractCacheDataSyncDao<DemoSyncDataUser
         String id = String.valueOf(params.get("id"));
 
         try (Connection c = dao.getConnection()) {
-            String sql = KvTemplate.builder(selectSql)
+            String sql = KvTemplate233.builder(selectSql)
                     .put("id", id)
                     .build();
             PreparedStatement ps = c.prepareStatement(sql);
@@ -107,7 +107,7 @@ public class AsyncUserDaoCache extends AbstractCacheDataSyncDao<DemoSyncDataUser
                 if (data == null) {
                     continue;
                 }
-                sql = KvTemplate.builder(upsertSql)
+                sql = KvTemplate233.builder(upsertSql)
                         .put("id", String.valueOf(Optional.ofNullable(data.getId()).orElse(idGeneratorBySnowflake.nextId().intValue())))
                         .put("name", data.getName())
                         .build();

@@ -14,37 +14,37 @@ import java.util.regex.Pattern;
  *
  * @author SolarisNeko on 2021-07-01
  **/
-public class KvTemplate {
+public class KvTemplate233 {
 
     private static final Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
 
 
     private final String kvTemplate;
-    private final Map<String, Object> originalValueKv = new HashMap<>(2, 0.8f);
+    private final Map<String, Object> kvMap = new HashMap<>(2, 0.8f);
 
-    public KvTemplate(String kvTemplate) {
+    public KvTemplate233(String kvTemplate) {
         this.kvTemplate = kvTemplate;
     }
 
-    public static KvTemplate builder(String kvTemplate) {
+    public static KvTemplate233 builder(String kvTemplate) {
         if (StringUtils.isBlank(kvTemplate)) {
             throw new RuntimeException("your kv template is blank !");
         }
-        return new KvTemplate(kvTemplate);
+        return new KvTemplate233(kvTemplate);
     }
 
 
-    public KvTemplate mergeJoin(String key, Object value, String union) {
-        originalValueKv.merge(key, value, (v1, v2) -> v1 + union + v2);
+    public KvTemplate233 mergeJoin(String key, Object value, String union) {
+        kvMap.merge(key, value, (v1, v2) -> v1 + union + v2);
         return this;
     }
 
-    public KvTemplate put(String key, Object value) {
-        originalValueKv.put(key, value);
+    public KvTemplate233 put(String key, Object value) {
+        kvMap.put(key, value);
         return this;
     }
 
-    public KvTemplate put(Map<String, Object> kv) {
+    public KvTemplate233 put(Map<String, Object> kv) {
         if (kv == null) {
             return this;
         }
@@ -58,18 +58,20 @@ public class KvTemplate {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(kvTemplate);
-
-        // high performance
-        for (Map.Entry<String, Object> originalKv : originalValueKv.entrySet()) {
-            String value = String.valueOf(originalKv.getValue());
-            int start = builder.indexOf("${" + originalKv.getKey() + "}");
-            if (start != -1) {
-                int end = start + originalKv.getKey().length() + 3;
-                builder.replace(start, end, value);
+        // 替换全部
+        StringBuilder sb = new StringBuilder(kvTemplate);
+        for (Map.Entry<String, Object> entry : kvMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            String placeholder = "\\$\\{" + key + "\\}";
+            Matcher matcher = Pattern.compile(placeholder).matcher(sb);
+            int startIndex = 0;
+            while (matcher.find(startIndex)) {
+                sb.replace(matcher.start(), matcher.end(), String.valueOf(value));
+                startIndex = matcher.start() + String.valueOf(value).length();
             }
         }
-        return builder.toString();
+        return sb.toString();
     }
 
 

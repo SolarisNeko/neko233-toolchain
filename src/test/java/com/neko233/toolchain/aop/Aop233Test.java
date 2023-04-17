@@ -5,13 +5,13 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 
-public class AopProxy233Test {
+public class Aop233Test {
 
     @Test
     public void baseTest() {
         WillError2CountHandler willError2CountHandler = new WillError2CountHandlerImpl();
 
-        WillError2CountHandler handler = AopProxy233.proxy(willError2CountHandler, EatExceptionAopApi);
+        WillError2CountHandler handler = Aop233.proxy(willError2CountHandler, EatExceptionAopApi);
 
         int handle = 0;
         try {
