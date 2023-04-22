@@ -1,4 +1,4 @@
-package com.neko233.toolchain.explainer.text;
+package com.neko233.toolchain.parser.text;
 
 import com.neko233.toolchain.common.file.FileUtils233;
 import org.jetbrains.annotations.NotNull;

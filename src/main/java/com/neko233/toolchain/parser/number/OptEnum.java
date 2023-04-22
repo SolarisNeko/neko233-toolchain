@@ -1,4 +1,4 @@
-package com.neko233.toolchain.explainer.number;
+package com.neko233.toolchain.parser.number;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
