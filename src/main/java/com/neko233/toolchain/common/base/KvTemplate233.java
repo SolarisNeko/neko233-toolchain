@@ -1,11 +1,9 @@
 package com.neko233.toolchain.common.base;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,5 +142,22 @@ public class KvTemplate233 {
         }
 
         return result;
+    }
+
+
+    @NotNull
+    public static String generateTemplate(String toFormatText,
+                                          Map<String, ?> kv) {
+        Set<String> keySet = Optional.ofNullable(kv).orElse(MapUtils233.of()).keySet();
+        return generateTemplate(toFormatText, keySet);
+    }
+
+    @NotNull
+    public static String generateTemplate(String toFormatText, Set<String> keySet) {
+        String newFormat = Optional.ofNullable(toFormatText).orElse("");
+        for (String key : Optional.ofNullable(keySet).orElse(SetUtils233.of())) {
+            newFormat = newFormat.replaceAll(key, "\\${" + key + "}");
+        }
+        return newFormat;
     }
 }

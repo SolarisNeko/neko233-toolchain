@@ -5,6 +5,9 @@
 
 ## version
 
+### 1.1.2
+1. [Add] 
+
 ### v1.1.1
 1. [BugFix] KvTemplate Bug
 
