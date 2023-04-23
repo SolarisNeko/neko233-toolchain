@@ -1,4 +1,4 @@
-package com.neko233.toolchain.explainer.functionText;
+package com.neko233.toolchain.parser.functionText;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

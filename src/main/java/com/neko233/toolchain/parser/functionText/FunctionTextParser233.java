@@ -1,4 +1,4 @@
-package com.neko233.toolchain.explainer.functionText;
+package com.neko233.toolchain.parser.functionText;
 
 import com.neko233.toolchain.common.base.StringUtils233;
 import lombok.extern.slf4j.Slf4j;

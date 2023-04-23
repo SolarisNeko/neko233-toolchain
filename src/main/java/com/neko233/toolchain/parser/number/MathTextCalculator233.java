@@ -1,4 +1,4 @@
-package com.neko233.toolchain.explainer.number;
+package com.neko233.toolchain.parser.number;
 
 import com.alibaba.fastjson2.JSON;
 import com.neko233.toolchain.common.base.KvTemplate233;
